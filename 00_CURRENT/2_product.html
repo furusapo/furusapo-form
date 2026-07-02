@@ -1135,5 +1135,85 @@ function furusapoGenerateBrowserProductId() {
 }
 </script>
 
+
+<script>
+/* 商品一覧をスプレッドシートから読み込む版 */
+function loadProductsFromSheet() {
+  const customerId = typeof getProductCustomerId === "function" ? getProductCustomerId() : "";
+  const callbackName = "furusapoProductsCallback_" + Date.now();
+
+  window[callbackName] = function(res) {
+    try {
+      const list = (res && res.products) ? res.products : [];
+      renderProductBrowserListFromSheet(list);
+    } finally {
+      delete window[callbackName];
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = GAS_URL
+    + "?action=getProducts"
+    + "&customer_id=" + encodeURIComponent(customerId)
+    + "&callback=" + encodeURIComponent(callbackName)
+    + "&t=" + Date.now();
+
+  script.onerror = function() {
+    alert("商品一覧の読み込みに失敗しました。GAS側に getProducts が追加されているか確認してください。");
+  };
+
+  document.body.appendChild(script);
+}
+
+function renderProductBrowserListFromSheet(list) {
+  const area = document.getElementById("productBrowserListArea");
+  const container = document.getElementById("productBrowserListItems");
+  if (!area || !container) return;
+
+  if (!list || list.length === 0) {
+    area.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  area.style.display = "block";
+
+  container.innerHTML = list.map(function(item, index) {
+    return `
+      <div style="padding:16px; margin-bottom:12px; background:#fff; border:1px solid #ddd; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">
+            ${index + 1}. ${furusapoEscapeHtml(item.product_name || item["商品名"] || "商品名未入力")}
+          </div>
+        </div>
+        <div style="font-size:14px; color:#555; line-height:1.8;">
+          品番・商品番号：${furusapoEscapeHtml(item.product_code || item["品番・商品番号"] || "未入力")}<br>
+          通常販売価格（税込）：${furusapoEscapeHtml(item.price || item["通常価格"] || item["通常販売価格"] || "未入力")}<br>
+          商品サイズ：${furusapoEscapeHtml(item.product_size || item.size || item["サイズ"] || "未入力")}<br>
+          重さ：${furusapoEscapeHtml(item.weight || item["重量"] || "未入力")}<br>
+          商品登録ID：${furusapoEscapeHtml(item.product_id || item["商品登録ID"] || "未取得")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* 既存のlocalStorage一覧表示を上書き */
+function renderProductBrowserList() {
+  loadProductsFromSheet();
+}
+
+/* 登録後もスプシから読み直す */
+function saveCurrentProductToBrowserList() {
+  window.furusapoEditingProductId = "";
+  window.furusapoLastSubmittedProduct = null;
+  setTimeout(loadProductsFromSheet, 1200);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(loadProductsFromSheet, 500);
+});
+</script>
+
 </body>
 </html>
