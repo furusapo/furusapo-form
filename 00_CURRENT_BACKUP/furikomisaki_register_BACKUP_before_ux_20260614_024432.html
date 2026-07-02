@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>振込先登録フォーム｜ふるサポ埼玉</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 40px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 36px;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    .lead {
+      text-align: center;
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .notice {
+      background: #fff6d8;
+      color: #5a4500;
+      padding: 16px 18px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .section {
+      margin-top: 32px;
+    }
+
+    .section h2 {
+      font-size: 18px;
+      border-left: 6px solid #111;
+      padding-left: 12px;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .required {
+      color: #d00;
+      font-size: 13px;
+      margin-left: 4px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    button,
+    a.button {
+      flex: 1;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+    .main-btn {
+      background: #111;
+      color: #fff;
+    }
+
+    .sub-btn {
+      background: #e9e9ee;
+      color: #222;
+    }
+
+    .test-btn {
+      background: #fff6d8;
+      color: #5a4500;
+    }
+
+    .result {
+      display: none;
+      margin-top: 24px;
+      background: #f0f7ff;
+      border-radius: 14px;
+      padding: 18px;
+      line-height: 1.8;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 20px;
+      }
+
+      .container {
+        padding: 24px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+        max-width: none;
+      }
+
+      .buttons {
+        display: none;
+      }
+
+      .result {
+        display: none !important;
+      }
+
+      input,
+      select,
+      textarea {
+        border: 1px solid #999;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+    <h1>振込先登録フォーム</h1>
+
+    <p class="lead">
+      お振込み先の口座情報をご登録ください。<br>
+      入力後、印刷またはPDF保存できます。
+    </p>
+
+    <div class="notice">
+      ※ 口座名義カナは、通帳・キャッシュカード等に記載されている正式な表記でご入力ください。<br>
+      ※ 口座情報に誤りがある場合、お振込みができない場合があります。<br>
+      ※ このフォームはまず入力・確認用です。スプレッドシート連携は次のステップで設定します。
+    </div>
+
+    <form id="bankForm">
+
+<input type="hidden" name="customer_id" id="customer_id">
+
+      <div class="section">
+        <h2>基本情報</h2>
+
+        <div class="form-group">
+          <label>案件ID</label>
+          <input type="text" name="case_id" placeholder="例：FS-20260610-001">
+        </div>
+
+        <div class="form-group">
+          <label>事業者名・屋号 <span class="required">必須</span></label>
+          <input type="text" name="business_name" required placeholder="例：株式会社〇〇 / 〇〇商店">
+        </div>
+
+        <div class="form-group">
+          <label>担当者名 <span class="required">必須</span></label>
+          <input type="text" name="person_in_charge" required placeholder="例：山田 太郎">
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>電話番号</label>
+            <input type="tel" name="phone" placeholder="例：048-000-0000">
+          </div>
+
+          <div class="form-group">
+            <label>メールアドレス</label>
+            <input type="email" name="email" placeholder="例：sample@example.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>振込先口座情報</h2>
+
+        <div class="row">
+          <div class="form-group">
+            <label>金融機関名 <span class="required">必須</span></label>
+            <input type="text" name="bank_name" required placeholder="例：埼玉りそな銀行">
+          </div>
+
+          <div class="form-group">
+            <label>金融機関コード</label>
+            <input type="text" name="bank_code" inputmode="numeric" placeholder="例：0017">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>支店名 <span class="required">必須</span></label>
+            <input type="text" name="branch_name" required placeholder="例：大宮支店">
+          </div>
+
+          <div class="form-group">
+            <label>支店コード</label>
+            <input type="text" name="branch_code" inputmode="numeric" placeholder="例：123">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>預金種目 <span class="required">必須</span></label>
+          <select name="account_type" required>
+            <option value="">選択してください</option>
+            <option value="普通">普通</option>
+            <option value="当座">当座</option>
+            <option value="貯蓄">貯蓄</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>口座番号 <span class="required">必須</span></label>
+          <input type="text" name="account_number" required inputmode="numeric" placeholder="例：1234567">
+        </div>
+
+        <div class="form-group">
+          <label>口座名義カナ <span class="required">必須</span></label>
+          <input type="text" name="account_name_kana" required placeholder="例：カ）マルマル / マルマルショウテン">
+        </div>
+
+        <div class="form-group">
+          <label>口座名義</label>
+          <input type="text" name="account_name" placeholder="例：株式会社〇〇 / 〇〇商店">
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>請求・補足情報</h2>
+
+        <div class="form-group">
+          <label>請求書の宛名</label>
+          <input type="text" name="invoice_name" placeholder="例：株式会社〇〇">
+        </div>
+
+        <div class="form-group">
+          <label>支払い条件・補足</label>
+          <textarea name="payment_note" placeholder="例：月末締め翌月末払い、その他補足事項など"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>備考</label>
+          <textarea name="note" placeholder="その他、確認事項があればご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button type="button" class="test-btn" onclick="fillTestData()">テスト入力</button>
+        <button type="button" class="main-btn" onclick="showPreview()">入力内容を確認</button>
+        <button type="button" class="main-btn" onclick="submitToGAS()">スプレッドシートへ保存</button>
+        <button type="button" class="sub-btn" onclick="window.print()">印刷 / PDF保存</button>
+        <button type="reset" class="sub-btn" onclick="hidePreview()">クリア</button>
+        <a class="button sub-btn" href="index.html">メニューに戻る</a>
+      </div>
+    </form>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    function fillTestData() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const h = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+
+      const values = {
+        case_id: `TEST-${y}${m}${d}-${h}${min}`,
+        business_name: "テスト商店",
+        person_in_charge: "テスト 太郎",
+        phone: "048-000-0000",
+        email: "test@example.com",
+        bank_name: "テスト銀行",
+        bank_code: "0001",
+        branch_name: "テスト支店",
+        branch_code: "123",
+        account_type: "普通",
+        account_number: "1234567",
+        account_name_kana: "テストショウテン",
+        account_name: "テスト商店",
+        invoice_name: "テスト商店",
+        payment_note: "テスト用データです",
+        note: "自動テスト入力"
+      };
+
+      Object.keys(values).forEach(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el) el.value = values[name];
+      });
+
+      hidePreview();
+      alert("テストデータを入力しました。");
+    }
+
+    function getFormData() {
+      const form = document.getElementById("bankForm");
+      const formData = new FormData(form);
+      formData.set("customer_id", getBankCustomerId());
+      const data = {};
+
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      return data;
+    }
+
+    function showPreview() {
+      const form = document.getElementById("bankForm");
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const data = getFormData();
+
+      const text =
+`【振込先登録内容】
+
+案件ID：${data.case_id || ""}
+事業者名・屋号：${data.business_name || ""}
+担当者名：${data.person_in_charge || ""}
+電話番号：${data.phone || ""}
+メールアドレス：${data.email || ""}
+
+金融機関名：${data.bank_name || ""}
+金融機関コード：${data.bank_code || ""}
+支店名：${data.branch_name || ""}
+支店コード：${data.branch_code || ""}
+預金種目：${data.account_type || ""}
+口座番号：${data.account_number || ""}
+口座名義カナ：${data.account_name_kana || ""}
+口座名義：${data.account_name || ""}
+
+請求書の宛名：${data.invoice_name || ""}
+支払い条件・補足：${data.payment_note || ""}
+備考：${data.note || ""}`;
+
+      const result = document.getElementById("result");
+      result.textContent = text;
+      result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function hidePreview() {
+      const result = document.getElementById("result");
+      result.style.display = "none";
+      result.textContent = "";
+    }
+
+    async function submitToSpreadsheet() {
+      const form = document.getElementById("bankForm");
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      formData.set("customer_id", getBankCustomerId());
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbwry1QeRGqGRZ7NuQf2QhoPFTqZcyiz7qR6LBYXA1x9e2ogowgJtPjGMNjJ4zQY4rgC/exec", {
+          method: "POST",
+          body: formData,
+          mode: "no-cors"
+        });
+
+        alert("スプレッドシートへ保存しました。\n反映されているか確認してください。");
+      } catch (error) {
+        alert("保存時にエラーが発生しました。\nGAS URLやデプロイ設定を確認してください。");
+        console.error(error);
+      }
+    }
+
+
+    async function submitToGAS() {
+      const form = document.getElementById("bankForm");
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      formData.set("customer_id", getBankCustomerId());
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbwry1QeRGqGRZ7NuQf2QhoPFTqZcyiz7qR6LBYXA1x9e2ogowgJtPjGMNjJ4zQY4rgC/exec", {
+          method: "POST",
+          body: formData,
+          mode: "no-cors"
+        });
+
+        alert("スプレッドシートへ送信しました。反映を確認してください。");
+      } catch (error) {
+        alert("送信エラーが発生しました。GAS URLや通信状態を確認してください。");
+        console.error(error);
+      }
+    }
+
+  </script>
+
+<script>
+function getBankCustomerId() {
+  let customerId = "";
+
+  // ?customer_id=FS-xxx
+  const params = new URLSearchParams(window.location.search);
+  customerId = params.get("customer_id") || "";
+
+  // #customer_id=FS-xxx
+  if (!customerId && window.location.hash) {
+    const hashText = window.location.hash.replace(/^#/, "");
+    const hashParams = new URLSearchParams(hashText);
+    customerId = hashParams.get("customer_id") || "";
+  }
+
+  return customerId;
+}
+
+function setBankCustomerId() {
+  const customerId = getBankCustomerId();
+
+  let input = document.querySelector('[name="customer_id"]');
+
+  if (!input) {
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "customer_id";
+    input.id = "customer_id";
+
+    const form = document.getElementById("bankForm");
+    if (form) {
+      form.prepend(input);
+    }
+  }
+
+  input.value = customerId;
+  console.log("振込先 customer_id:", customerId);
+
+  return customerId;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  setBankCustomerId();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ふるサポ埼玉 LPヘッダー</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Noto Sans JP", sans-serif;
+    background: #f5f9ff;
+  }
+
+  .header {
+    height: 72px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-bottom: 1px solid #e5efff;
+    box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 900;
+    color: #2563eb;
+    letter-spacing: 0.04em;
+  }
+
+  .line-btn {
+    text-decoration: none;
+    background: #06c755;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 12px 18px;
+    border-radius: 999px;
+    box-shadow: 0 6px 14px rgba(6, 199, 85, 0.28);
+  }
+
+  .line-btn::before {
+    content: "💬 ";
+  }
+
+  @media (max-width: 480px) {
+    .header {
+      height: 64px;
+      padding: 0 14px;
+    }
+
+    .logo {
+      font-size: 19px;
+    }
+
+    .line-btn {
+      font-size: 14px;
+      padding: 10px 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">ふるサポ埼玉</div>
+  <a href="#" class="line-btn">LINEで無料相談</a>
+</header>
+
+</body>
+</html>

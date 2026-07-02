@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ふるサポ埼玉｜返礼品登録かんたん診断</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: #f6f3ef;
+      color: #1f2933;
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #ffffff, #edf3fb);
+      border-radius: 24px;
+      padding: 34px 26px;
+      margin-bottom: 24px;
+      border: 1px solid #e5e0d8;
+      box-shadow: 0 12px 30px rgba(31, 58, 95, 0.08);
+    }
+
+    .label {
+      display: inline-block;
+      background: #1f3a5f;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: #1f3a5f;
+      font-size: 30px;
+      line-height: 1.4;
+    }
+
+    .lead {
+      color: #6b7280;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    form {
+      display: grid;
+      gap: 20px;
+    }
+
+    .section {
+      background: white;
+      border: 1px solid #e5e0d8;
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 8px 20px rgba(31, 41, 51, 0.04);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #e5e0d8;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .num {
+      width: 30px;
+      height: 30px;
+      background: #1f3a5f;
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    h2 {
+      margin: 0;
+      color: #1f3a5f;
+      font-size: 19px;
+    }
+
+    .question {
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #eee9e1;
+    }
+
+    .question:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .question-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+
+    .option input {
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    .option span {
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d7d2ca;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      background: white;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .required {
+      color: #b91c1c;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    button {
+      border: none;
+      background: #1f3a5f;
+      color: white;
+      padding: 14px 38px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(31, 58, 95, 0.22);
+    }
+
+    .actions {
+      text-align: center;
+    }
+
+    .result {
+      display: none;
+      background: #ffffff;
+      border: 2px solid #1f3a5f;
+      border-radius: 22px;
+      padding: 26px;
+      margin-top: 24px;
+      box-shadow: 0 12px 30px rgba(31, 58, 95, 0.10);
+    }
+
+    .result h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .score {
+      display: inline-block;
+      background: #1f3a5f;
+      color: white;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .cta {
+      margin-top: 18px;
+      background: #fffaf2;
+      border: 1px solid #ead8bd;
+      color: #6b4e25;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 14px;
+    }
+
+    .cta a {
+      color: #1f3a5f;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .section {
+        padding: 22px 18px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="label">ふるサポ埼玉</span>
+      <h1>返礼品登録<br>かんたん診断</h1>
+      <p class="lead">
+        あなたの商品が、ふるさと納税の返礼品として登録できそうかを簡単に確認できます。<br>
+        正式な可否判断には自治体・委託業者等の確認が必要ですが、最初の目安としてご利用ください。
+      </p>
+    </section>
+
+    <form id="diagnosisForm">
+      <section class="section">
+        <div class="section-title">
+          <span class="num">1</span>
+          <h2>商品について</h2>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q1. 返礼品にしたい商品・サービスがありますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="2" required><span>はい、具体的な商品・サービスがあります</span></label>
+            <label class="option"><input type="radio" name="q1" value="1"><span>候補はありますが、まだ決まっていません</span></label>
+            <label class="option"><input type="radio" name="q1" value="0"><span>まだありません</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q2. その商品は継続して提供できますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="2" required><span>継続して提供できます</span></label>
+            <label class="option"><input type="radio" name="q2" value="1"><span>数量限定・季節限定なら可能です</span></label>
+            <label class="option"><input type="radio" name="q2" value="0"><span>まだ分かりません</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q3. 商品の価格・内容量・サイズは決まっていますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="2" required><span>決まっています</span></label>
+            <label class="option"><input type="radio" name="q3" value="1"><span>だいたい決まっています</span></label>
+            <label class="option"><input type="radio" name="q3" value="0"><span>まだ決まっていません</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="num">2</span>
+          <h2>製造・制作について</h2>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q4. 商品の製造・制作・加工は、主に自社または地域内で行っていますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4" value="2" required><span>はい、主に自社または地域内で行っています</span></label>
+            <label class="option"><input type="radio" name="q4" value="1"><span>一部を外注しています</span></label>
+            <label class="option"><input type="radio" name="q4" value="0"><span>ほとんど外部で製造・制作しています</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q5. 商品の制作工程・製造工程を説明できますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q5" value="2" required><span>説明できます</span></label>
+            <label class="option"><input type="radio" name="q5" value="1"><span>整理すれば説明できそうです</span></label>
+            <label class="option"><input type="radio" name="q5" value="0"><span>まだ整理できていません</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="num">3</span>
+          <h2>発送・掲載準備について</h2>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q6. 商品を発送する体制はありますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q6" value="2" required><span>発送できます</span></label>
+            <label class="option"><input type="radio" name="q6" value="1"><span>準備すれば対応できそうです</span></label>
+            <label class="option"><input type="radio" name="q6" value="0"><span>まだ発送体制がありません</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="question-title">Q7. 商品写真や説明文はありますか？</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q7" value="2" required><span>写真も説明文もあります</span></label>
+            <label class="option"><input type="radio" name="q7" value="1"><span>どちらかはあります</span></label>
+            <label class="option"><input type="radio" name="q7" value="0"><span>まだありません</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="num">4</span>
+          <h2>ご連絡先</h2>
+        </div>
+
+        <div class="grid">
+          <div class="field full">
+            <label>事業者名・屋号</label>
+            <input type="text" name="business_name" placeholder="例：〇〇商店">
+          </div>
+
+          <div class="field">
+            <label>お名前</label>
+            <input type="text" name="contact_name" placeholder="例：山田 太郎">
+          </div>
+
+          <div class="field">
+            <label>メールアドレス</label>
+            <input type="email" name="email" placeholder="example@example.com">
+          </div>
+
+          <div class="field full">
+            <label>相談したいこと・商品について</label>
+            <textarea name="notes" placeholder="商品内容、現在困っていること、登録したい自治体などがあればご記入ください。"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="submit">診断結果を見る</button>
+      </div>
+    </form>
+
+    <section class="result" id="resultBox">
+      <div class="score" id="scoreText"></div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultMessage"></p>
+
+      <div class="cta">
+        診断結果をもとに、具体的な登録可否や必要書類を確認したい方は、正式なヒアリングへお進みください。<br>
+        <a href="business.html">事業者基本情報フォームへ進む</a>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      本診断は簡易的な目安です。正式な登録可否は、自治体・委託業者・地場産品基準等の確認が必要です。
+    </p>
+  </main>
+
+  <script>
+    document.getElementById("diagnosisForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      let score = 0;
+      for (let i = 1; i <= 7; i++) {
+        score += Number(data["q" + i] || 0);
+      }
+
+      const resultBox = document.getElementById("resultBox");
+      const scoreText = document.getElementById("scoreText");
+      const resultTitle = document.getElementById("resultTitle");
+      const resultMessage = document.getElementById("resultMessage");
+
+      scoreText.textContent = "診断スコア：" + score + " / 14点";
+
+      if (score >= 10) {
+        resultTitle.textContent = "返礼品登録できる可能性が高いです";
+        resultMessage.textContent = "商品内容・製造工程・発送体制がある程度整っているため、ふるさと納税の返礼品登録に進められる可能性があります。次は事業者情報・商品情報を整理して、自治体や委託業者への確認に進みましょう。";
+      } else if (score >= 5) {
+        resultTitle.textContent = "登録に向けて条件確認が必要です";
+        resultMessage.textContent = "商品候補はありますが、価格・工程・発送体制・写真など、整理が必要な項目があります。今の段階で必要な準備を確認することで、登録に向けた具体的なステップが見えてきます。";
+      } else {
+        resultTitle.textContent = "まずは商品内容の整理から始めましょう";
+        resultMessage.textContent = "現時点では、返礼品として登録するために必要な情報がまだ不足している可能性があります。商品候補、製造工程、発送方法などを一緒に整理するところから始めるのがおすすめです。";
+      }
+
+      data.score = score;
+      data.result_title = resultTitle.textContent;
+      data.result_message = resultMessage.textContent;
+
+      resultBox.style.display = "block";
+      resultBox.scrollIntoView({ behavior: "smooth" });
+
+      fetch("https://script.google.com/macros/s/AKfycbxzwLzdqc7YKxZYQk2Ld3r-IczMrkfb7GpeNYkrDUUZbSAzKHMhYeja9D7PxSAIfizppg/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(() => {
+        console.log("診断データを送信しました:", data);
+      })
+      .catch((error) => {
+        console.error("診断データ送信エラー:", error);
+      });
+    });
+  </script>
+</body>
+</html>
