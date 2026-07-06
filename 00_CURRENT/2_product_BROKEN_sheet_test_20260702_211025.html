@@ -477,7 +477,18 @@
         ご入力いただいた内容は、返礼品の商品情報作成・掲載準備・工程確認のために使用いたします。
       </p>
     </form>
-  </main>
+
+<div id="productBrowserListArea" style="margin: 32px 0; padding: 24px; background: #f7f7f7; border: 1px solid #ddd; border-radius: 16px; display:none;">
+  <h3 style="margin: 0 0 12px; color:#17365d;">登録した商品一覧</h3>
+  <p style="margin: 0 0 16px; color:#666; line-height:1.7;">
+    この画面で登録した商品を確認できます。<br>
+    続けて登録する場合は、そのまま次の商品をご入力ください。
+  </p>
+  <div id="productBrowserListItems"></div>
+</div>
+
+
+</main>
 
   
 <script>
@@ -503,13 +514,20 @@ document.getElementById("productForm").addEventListener("submit", async function
 
   const submitButton = this.querySelector('button[type="submit"]');
   submitButton.disabled = true;
-  submitButton.textContent = "送信中...";
+  submitButton.textContent = "登録中...";
 
   const formData = new FormData(this);
   const data = Object.fromEntries(formData.entries());
 
   // 顧客IDをURLから取得して送信データに追加
   data.customer_id = getProductCustomerId();
+
+  // 商品登録IDと処理種別を追加
+  data.product_id = window.furusapoEditingProductId || furusapoGenerateBrowserProductId();
+  data.action = window.furusapoEditingProductId ? "update" : "create";
+
+  // ブラウザ一覧保存用に送信データを保持
+  window.furusapoLastSubmittedProduct = data;
 
   console.log("送信データ:", data);
 
@@ -523,7 +541,10 @@ document.getElementById("productForm").addEventListener("submit", async function
       body: JSON.stringify(data)
     });
 
-    alert("商品情報を送信しました。スプレッドシートをご確認ください。");
+    alert("商品情報を受け付けました。\n\n続けて別の商品を登録する場合は、そのまま次の商品をご入力ください。");
+    saveCurrentProductToBrowserList();
+    resetProductFormAfterSubmit();
+    
     this.reset();
 
   } catch (error) {
@@ -531,7 +552,7 @@ document.getElementById("productForm").addEventListener("submit", async function
     alert("送信中にエラーが発生しました。");
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = "入力内容を送信する";
+    submitButton.textContent = "この商品を登録する";
   }
 });
 </script>
@@ -554,7 +575,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <script>
 function fillProductTestData() {
   const testData = {
-    business_name: "顧客IDテスト事業者",
+    // business_name はURLから引き継いだ値を優先するため、テスト入力では上書きしない
     product_code: "TEST-001",
     product_name: "顧客IDテスト商品",
     price: "1000",
@@ -631,41 +652,489 @@ function fillProductTestData() {
 
 
 <script>
-function getProductUrlParams() {
-  const params = new URLSearchParams(window.location.search);
+</script>
 
-  if (window.location.hash) {
+
+<script>
+
+function getBusinessNameFromProductUrl() {
+  const searchParams = new URLSearchParams(window.location.search);
+  let businessName = searchParams.get("business_name") || "";
+
+  if (!businessName && window.location.hash) {
     const hashText = window.location.hash.replace(/^#/, "");
     const hashParams = new URLSearchParams(hashText);
-    hashParams.forEach(function(value, key) {
-      if (!params.has(key)) {
-        params.set(key, value);
-      }
-    });
+    businessName = hashParams.get("business_name") || "";
   }
 
-  return params;
+  return businessName;
 }
 
-function setProductValue(name, value) {
-  if (!value) return;
+function resetProductFormAfterSubmit() {
+  const form = document.getElementById("productForm") || document.querySelector("form");
+  if (!form) return;
 
-  const el = document.querySelector('[name="' + name + '"]');
-  if (!el) return;
+  const currentBusinessInput = document.querySelector('[name="business_name"]');
+  const businessName =
+    (currentBusinessInput && currentBusinessInput.value)
+      ? currentBusinessInput.value
+      : getBusinessNameFromProductUrl();
 
-  if (!el.value) {
-    el.value = value;
+  form.reset();
+
+  const newBusinessInput = document.querySelector('[name="business_name"]');
+  if (newBusinessInput && businessName) {
+    newBusinessInput.value = businessName;
   }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+</script>
+
+
+<script>
+function getProductUrlValue(key) {
+  const searchParams = new URLSearchParams(window.location.search);
+  let value = searchParams.get(key) || "";
+
+  if (!value && window.location.hash) {
+    const hashText = window.location.hash.replace(/^#/, "");
+    const hashParams = new URLSearchParams(hashText);
+    value = hashParams.get(key) || "";
+  }
+
+  return value;
+}
+
+function fillProductBusinessNameFromUrl() {
+  const businessName = getProductUrlValue("business_name");
+  if (!businessName) return;
+
+  const input =
+    document.querySelector('[name="business_name"]') ||
+    document.querySelector('#business_name');
+
+  if (input) {
+    input.value = businessName;
+  }
+}
+
+function resetProductFormAfterSubmit() {
+  const form = document.getElementById("productForm") || document.querySelector("form");
+  if (!form) return;
+
+  const businessName =
+    getProductUrlValue("business_name") ||
+    (document.querySelector('[name="business_name"]')?.value || "");
+
+  form.reset();
+
+  const businessInput =
+    document.querySelector('[name="business_name"]') ||
+    document.querySelector('#business_name');
+
+  if (businessInput && businessName) {
+    businessInput.value = businessName;
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  const params = getProductUrlParams();
-
-  setProductValue("business_name", params.get("business_name"));
-
-  console.log("商品情報フォーム 自動入力:", Object.fromEntries(params.entries()));
+  fillProductBusinessNameFromUrl();
 });
 </script>
+
+
+<script>
+/* 事業者名の自動入力を最後に強制実行 */
+function furusapoGetUrlValue(key) {
+  const searchParams = new URLSearchParams(window.location.search);
+  let value = searchParams.get(key) || "";
+
+  if (!value && window.location.hash) {
+    const hashText = window.location.hash.replace(/^#/, "");
+    const hashParams = new URLSearchParams(hashText);
+    value = hashParams.get(key) || "";
+  }
+
+  return value;
+}
+
+function furusapoFindBusinessNameInput() {
+  // まず name / id で探す
+  let input =
+    document.querySelector('[name="business_name"]') ||
+    document.querySelector('#business_name') ||
+    document.querySelector('[name="businessName"]') ||
+    document.querySelector('#businessName');
+
+  if (input) return input;
+
+  // 事業者名ラベルの近くにある input を探す
+  const labels = Array.from(document.querySelectorAll("label"));
+  const businessLabel = labels.find(label => label.textContent.includes("事業者名"));
+
+  if (businessLabel) {
+    const parent = businessLabel.closest("div") || businessLabel.parentElement;
+    if (parent) {
+      input = parent.querySelector("input, textarea, select");
+      if (input) return input;
+    }
+
+    let next = businessLabel.nextElementSibling;
+    while (next) {
+      input = next.querySelector ? next.querySelector("input, textarea, select") : null;
+      if (input) return input;
+      if (next.matches && next.matches("input, textarea, select")) return next;
+      next = next.nextElementSibling;
+    }
+  }
+
+  return null;
+}
+
+function furusapoFillBusinessName() {
+  const businessName = furusapoGetUrlValue("business_name");
+  if (!businessName) return;
+
+  const input = furusapoFindBusinessNameInput();
+  if (input) {
+    input.value = businessName;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    console.log("事業者名を自動入力しました:", businessName);
+  } else {
+    console.log("事業者名入力欄が見つかりませんでした");
+  }
+}
+
+// ページ表示直後と少し後に実行
+document.addEventListener("DOMContentLoaded", function() {
+  furusapoFillBusinessName();
+  setTimeout(furusapoFillBusinessName, 300);
+  setTimeout(furusapoFillBusinessName, 1000);
+});
+
+// 送信後リセット用：既存関数を上書き
+function resetProductFormAfterSubmit() {
+  const form = document.getElementById("productForm") || document.querySelector("form");
+  if (!form) return;
+
+  const businessName = furusapoGetUrlValue("business_name");
+
+  form.reset();
+
+  setTimeout(function() {
+    const input = furusapoFindBusinessNameInput();
+    if (input && businessName) {
+      input.value = businessName;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 100);
+}
+</script>
+
+
+<script>
+function furusapoProductListGetUrlValue(key) {
+  const searchParams = new URLSearchParams(window.location.search);
+  let value = searchParams.get(key) || "";
+
+  if (!value && window.location.hash) {
+    const hashText = window.location.hash.replace(/^#/, "");
+    const hashParams = new URLSearchParams(hashText);
+    value = hashParams.get(key) || "";
+  }
+
+  return value;
+}
+
+function furusapoProductListStorageKey() {
+  const customerId = furusapoProductListGetUrlValue("customer_id") || "no_customer_id";
+  return "furusapo_product_list_" + customerId;
+}
+
+function furusapoGetFieldValueByName(names) {
+  for (const name of names) {
+    const el = document.querySelector('[name="' + name + '"]') || document.querySelector('#' + name);
+    if (el && el.value !== undefined) return el.value;
+  }
+  return "";
+}
+
+function furusapoEscapeHtml(text) {
+  return String(text || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function saveCurrentProductToBrowserList() {
+  const key = furusapoProductListStorageKey();
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+
+  const source = window.furusapoLastSubmittedProduct || {};
+
+  const product = {
+    product_id: source.product_id || furusapoGenerateBrowserProductId(),
+    saved_at: new Date().toLocaleString("ja-JP"),
+
+    // 一覧表示用
+    business_name: source.business_name || furusapoGetFieldValueByName(["business_name", "businessName"]),
+    product_code: source.product_code || furusapoGetFieldValueByName(["product_code", "productCode", "item_code", "itemCode"]),
+    product_name: source.product_name || furusapoGetFieldValueByName(["product_name", "productName", "item_name", "itemName"]),
+    price: source.price || furusapoGetFieldValueByName(["price", "product_price", "normal_price", "selling_price"]),
+    size: source.product_size || source.size || furusapoGetFieldValueByName(["product_size", "size"]),
+    weight: source.weight || furusapoGetFieldValueByName(["weight", "product_weight"]),
+
+    // 修正時に全項目を戻すため、送信データを丸ごと保存
+    form_data: Object.assign({}, source)
+  };
+
+  if (!product.product_name && !product.price && !product.product_code) {
+    return;
+  }
+
+  const existingIndex = list.findIndex(function(item) {
+    return item.product_id && item.product_id === product.product_id;
+  });
+
+  if (existingIndex >= 0) {
+    list[existingIndex] = product;
+  } else {
+    list.push(product);
+  }
+
+  localStorage.setItem(key, JSON.stringify(list));
+
+  window.furusapoEditingProductId = "";
+  window.furusapoLastSubmittedProduct = null;
+
+  renderProductBrowserList();
+}
+
+function renderProductBrowserList() {
+  const area = document.getElementById("productBrowserListArea");
+  const container = document.getElementById("productBrowserListItems");
+  if (!area || !container) return;
+
+  const key = furusapoProductListStorageKey();
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+
+  if (list.length === 0) {
+    area.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  area.style.display = "block";
+
+  container.innerHTML = list.map(function(item, index) {
+    return `
+      <div style="padding: 16px; margin-bottom: 12px; background:#fff; border:1px solid #ddd; border-radius:12px;">
+        <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">
+          ${index + 1}. ${furusapoEscapeHtml(item.product_name || "商品名未入力")}
+        </div>
+        <div style="font-size:14px; color:#555; line-height:1.8;">
+          品番・商品番号：${furusapoEscapeHtml(item.product_code || "未入力")}<br>
+          通常販売価格（税込）：${furusapoEscapeHtml(item.price || "未入力")}<br>
+          商品サイズ：${furusapoEscapeHtml(item.size || "未入力")}<br>
+          重さ：${furusapoEscapeHtml(item.weight || "未入力")}<br>
+          登録日時：${furusapoEscapeHtml(item.saved_at || "")}<br>商品登録ID：${furusapoEscapeHtml(item.product_id || "未取得")}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  area.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  renderProductBrowserList();
+});
+</script>
+
+
+<script>
+/* 登録した商品一覧：修正・削除ボタン追加版 */
+
+function furusapoSetFieldValueByName(names, value) {
+  for (const name of names) {
+    const el = document.querySelector('[name="' + name + '"]') || document.querySelector('#' + name);
+    if (el && el.value !== undefined) {
+      el.value = value || "";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }
+  }
+  return false;
+}
+
+function editProductBrowserListItem(index) {
+  const key = furusapoProductListStorageKey();
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+  const item = list[index];
+
+  if (!item) return;
+
+  if (!item.product_id) {
+    alert("この商品は商品登録IDがないため、スプレッドシート上書き修正には対応していません。\n\n内容を修正する場合は、新しい商品として再登録してください。");
+    return;
+  }
+
+  if (!item.form_data) {
+    alert("この商品は古い形式で保存されているため、全項目をフォームに戻せません。\n\n今後登録する商品は、修正時に全項目が戻るようになります。");
+    return;
+  }
+
+  window.furusapoEditingProductId = item.product_id;
+
+  const form = document.getElementById("productForm") || document.querySelector("form");
+  if (form) {
+    form.reset();
+  }
+
+  Object.keys(item.form_data).forEach(function(name) {
+    const el = document.querySelector('[name="' + name + '"]') || document.querySelector('#' + name);
+    if (el && el.value !== undefined) {
+      el.value = item.form_data[name] || "";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  alert("商品情報をフォームに戻しました。\n\n内容を修正して、もう一度「この商品を登録する」を押してください。\n\n同じ商品登録IDの行をスプレッドシート上で上書きします。");
+}
+
+async function deleteProductBrowserListItem(index) {
+  const ok = confirm("この商品を一覧から削除しますか？\n\nスプレッドシート側は行を消さずに「削除済み」として記録します。");
+  if (!ok) return;
+
+  const key = furusapoProductListStorageKey();
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+  const item = list[index];
+
+  if (!item) return;
+
+  if (!item.product_id) {
+    alert("この商品は商品登録IDがないため、スプレッドシート側の削除済み反映には対応していません。\n\nブラウザ上の一覧からのみ削除します。");
+    list.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(list));
+    renderProductBrowserList();
+    return;
+  }
+
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "delete",
+        product_id: item.product_id || "",
+        customer_id: typeof getProductCustomerId === "function" ? getProductCustomerId() : "",
+        business_name: item.business_name || "",
+        product_code: item.product_code || "",
+        product_name: item.product_name || ""
+      })
+    });
+  } catch (error) {
+    console.error(error);
+    alert("削除処理の送信中にエラーが発生しました。");
+    return;
+  }
+
+  list.splice(index, 1);
+  localStorage.setItem(key, JSON.stringify(list));
+
+  renderProductBrowserList();
+
+  alert("商品を一覧から削除しました。\n\nスプレッドシート側は「削除済み」として記録されます。");
+}
+
+function renderProductBrowserList() {
+  const area = document.getElementById("productBrowserListArea");
+  const container = document.getElementById("productBrowserListItems");
+  if (!area || !container) return;
+
+  const key = furusapoProductListStorageKey();
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+
+  if (list.length === 0) {
+    area.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  area.style.display = "block";
+
+  container.innerHTML = list.map(function(item, index) {
+    return `
+      <div style="padding: 16px; margin-bottom: 12px; background:#fff; border:1px solid #ddd; border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">
+            ${index + 1}. ${furusapoEscapeHtml(item.product_name || "商品名未入力")}
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" onclick="editProductBrowserListItem(${index})" style="padding:8px 12px; border:1px solid #17365d; border-radius:8px; background:#fff; color:#17365d; font-size:13px; cursor:pointer;">
+              修正
+            </button>
+            <button type="button" onclick="deleteProductBrowserListItem(${index})" style="padding:8px 12px; border:1px solid #b00020; border-radius:8px; background:#fff; color:#b00020; font-size:13px; cursor:pointer;">
+              削除
+            </button>
+          </div>
+        </div>
+
+        <div style="font-size:14px; color:#555; line-height:1.8;">
+          品番・商品番号：${furusapoEscapeHtml(item.product_code || "未入力")}<br>
+          通常販売価格（税込）：${furusapoEscapeHtml(item.price || "未入力")}<br>
+          商品サイズ：${furusapoEscapeHtml(item.size || "未入力")}<br>
+          重さ：${furusapoEscapeHtml(item.weight || "未入力")}<br>
+          登録日時：${furusapoEscapeHtml(item.saved_at || "")}<br>商品登録ID：${furusapoEscapeHtml(item.product_id || "未取得")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+</script>
+
+
+<script>
+/* スプシ修正・削除反映用 */
+window.furusapoEditingProductId = "";
+window.furusapoLastSubmittedProduct = null;
+
+function furusapoGenerateBrowserProductId() {
+  const customerId =
+    typeof getProductCustomerId === "function"
+      ? getProductCustomerId()
+      : "NO-CUSTOMER";
+
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  const rand = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+
+  return customerId + "-P-" + y + m + d + hh + mm + ss + "-" + rand;
+}
+</script>
+
 
 </body>
 </html>

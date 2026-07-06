@@ -581,6 +581,7 @@ function loadProductsFromSheet() {
   script.src = GAS_URL
     + "?action=getProducts"
     + "&customer_id=" + encodeURIComponent(customerId)
+    + "&business_name=" + encodeURIComponent(getUrlValue("business_name"))
     + "&callback=" + encodeURIComponent(callbackName)
     + "&t=" + Date.now();
 
